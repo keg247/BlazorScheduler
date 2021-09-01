@@ -87,6 +87,10 @@
     text-align: center;
 }
 
+.scheduler > .month > .week > .days > .day.drop-target {
+    background-color: #E0E0E0 !important;
+}
+
 .scheduler > .month > .week > .days > div:not(:last-of-type) {
     border-right: 1px solid #eee;
 }

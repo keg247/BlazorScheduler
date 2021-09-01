@@ -1,7 +1,9 @@
 ﻿@namespace BlazorScheduler.Internal.Components
 @typeparam T
 
-<div class="appointment" style="--start: @Start; --order: @Order;" @onclick="e => Scheduler.OnAppointmentClick?.Invoke(Appointment, e)">
+<div class="appointment @Classes.AsString()" draggable="true" 
+     @ondragstart="HandleDragStart" @ondragend="HandleDragStop" 
+     style="--start: @Start; --order: @Order;" @onclick="e => Scheduler.OnAppointmentClick?.Invoke(Appointment, e)">
     <span class="dot" style="background-color: @BackgroundColor;"></span>
     <b>@Appointment.Title</b> - @Appointment.Start.ToString("htt") to @Appointment.End.ToString("htt")
 </div>

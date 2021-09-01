@@ -1,18 +1,18 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorScheduler.Core;
+using BlazorScheduler.Internal.Components;
+using BlazorScheduler.Internal.Extensions;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using BlazorScheduler.Internal.Extensions;
-using BlazorScheduler.Internal.Components;
-using System.Drawing;
-using Microsoft.AspNetCore.Components.Web;
-using BlazorScheduler.Core;
 
 namespace BlazorScheduler
 {
-	public partial class Scheduler<T> where T : IAppointment, new()
+    public partial class Scheduler<T> where T : IAppointment, new()
     {
         [Parameter] public List<T> Appointments { get; set; }
         [Parameter] public Func<T, Task> OnAddingNewAppointment { get; set; }
@@ -25,6 +25,10 @@ namespace BlazorScheduler
         private DateTime NewAppointmentAnchor;
 
         public DateTime CurrentDate { get; private set; }
+
+        public T DraggedAppointment { get; set; }
+        public bool IsDragInProgress { get; set; }
+
         public T NewAppointment { get; private set; }
         private bool DoneDragging = false;
 
@@ -58,8 +62,8 @@ namespace BlazorScheduler
 
         private IEnumerable<DateTime> GetDateRange()
         {
-            var startDate = new DateTime(CurrentDate.Year, CurrentDate.Month, 1).GetPrevious(StartDayOfWeek);
-            var endDate = new DateTime(CurrentDate.Year, CurrentDate.Month, DateTime.DaysInMonth(CurrentDate.Year, CurrentDate.Month)).GetNext((DayOfWeek)((int)(StartDayOfWeek - 1 + 7) % 7));
+            DateTime startDate = new DateTime(CurrentDate.Year, CurrentDate.Month, 1).GetPrevious(StartDayOfWeek);
+            DateTime endDate = new DateTime(CurrentDate.Year, CurrentDate.Month, DateTime.DaysInMonth(CurrentDate.Year, CurrentDate.Month)).GetNext((DayOfWeek)((int)(StartDayOfWeek - 1 + 7) % 7));
 
             return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
               .Select(offset => startDate.AddDays(offset));
@@ -67,7 +71,7 @@ namespace BlazorScheduler
 
         private IEnumerable<T> GetAppointments(DateTime start, DateTime end)
         {
-            var appointmentsInTimeframe = Appointments.Where(x => (start, end).Overlaps((x.Start, x.End))).ToList();
+            List<T> appointmentsInTimeframe = Appointments.Where(x => (start, end).Overlaps((x.Start, x.End))).ToList();
             if (NewAppointment is not null && (start, end).Overlaps((NewAppointment.Start, NewAppointment.End)))
 			{
                 appointmentsInTimeframe.Add(NewAppointment);
@@ -110,10 +114,15 @@ namespace BlazorScheduler
         {
             if (NewAppointment is not null && !DoneDragging)
             {
-                var day = DateTime.ParseExact(date, "yyyyMMdd", null);
+                DateTime day = DateTime.ParseExact(date, "yyyyMMdd", null);
                 (NewAppointment.Start, NewAppointment.End) = day < NewAppointmentAnchor ? (day, NewAppointmentAnchor) : (NewAppointmentAnchor, day);
                 StateHasChanged();
             }
+        }
+
+        public void Refresh()
+        {
+            StateHasChanged();
         }
     }
 }

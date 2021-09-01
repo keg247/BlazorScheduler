@@ -1,6 +1,8 @@
 ﻿@typeparam T
 
 <div class="appointment @Classes.AsString()"
+     draggable="true"
+     @ondragstart="HandleDragStart" @ondragend="HandleDragStop"
     style="--start: @Start; --end: @End; --order: @Order; background-color: @BackgroundColor; color: @TextColor;"
     @onclick="e => Scheduler.OnAppointmentClick(Appointment, e)">
     @Appointment.Title
